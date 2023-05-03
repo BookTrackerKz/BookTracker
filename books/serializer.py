@@ -32,8 +32,18 @@ class BookSerializer(serializers.ModelSerializer):
 
         publisher_data = validated_data.pop("publisher")
 
-        category = Category.objects.create(**category_data)
-        publisher = Publisher.objects.create(**publisher_data)
+        category = Category.objects.filter(name=category_data["name"])
+        if category.exists():
+            category = category.first()
+        else:
+            category = Category.objects.create(**category_data)
+
+        publisher = Publisher.objects.filter(name=publisher_data["name"])
+        if publisher.exists():
+            publisher = publisher.first()
+        else:
+            publisher = Publisher.objects.create(**publisher_data)
+
         book = Book.objects.create(
             category=category, publisher=publisher, **validated_data
         )
