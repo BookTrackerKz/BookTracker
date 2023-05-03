@@ -13,5 +13,11 @@ class User(AbstractUser):
     email = models.EmailField(max_length=127, unique=True)
     username = models.CharField(max_length=50, unique=True)
     cpf = models.CharField(max_length=11, unique=True)
-    number_loans = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)], default=0)
+    number_loans = models.IntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(5)], default=0
+    )
     cleared_date = models.DateField(auto_now=True)
+
+    loan = models.ManyToManyField(
+        "users.User", through="loans.Loan", related_name="user_loans"
+    )
