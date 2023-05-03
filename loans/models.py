@@ -8,8 +8,8 @@ class Loan(models.Model):
     loan_return = models.DateField(null=True, default=None)
 
     user = models.ForeignKey(
-        "users.User", on_delete=models.CASCADE, related_name="user_loans"
+        "users.User", on_delete=models.CASCADE, related_name="loans"
     )
     copy = models.ForeignKey(
-        "copies.Copy", on_delete=models.CASCADE, related_name="copies_loans"
+        "copies.Copy", on_delete=models.CASCADE, related_name="loans"
     )
