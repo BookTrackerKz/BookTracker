@@ -16,8 +16,8 @@ class User(AbstractUser):
     )
     cleared_date = models.DateField(auto_now=True)
 
-    loans = models.ManyToManyField(
-        "copies.Copy", through="Loan", related_name="users"
+    loan = models.ManyToManyField(
+        "copies.Copy", through="loans.Loan", related_name="users_loan"
     )
 
 
