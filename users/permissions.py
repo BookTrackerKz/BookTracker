@@ -2,7 +2,6 @@ from rest_framework import permissions
 from .models import User
 from rest_framework.views import View
 
-
     
 class IsAllowedUserToRetrieveAndModify(permissions.BasePermission):
 
@@ -13,18 +12,17 @@ class IsAllowedUserToRetrieveAndModify(permissions.BasePermission):
                 return True
             else:
                 if request.method in permissions.SAFE_METHODS:
-                    if request.user.is_staff:
+                    return True
+        return False
+
+class IsEstudentOwner(permissions.BasePermission):   
+
+    def has_object_permission(self, request, view: View, obj: User) -> bool:
+        if request.user.is_authenticated:
+            if request.user.is_superuser:
+                return True
+            if request.method in permissions.SAFE_METHODS or request.method == "PATCH":
+                if request.user.is_staff or request.method == "DELETE":
                         return True
-                    else:
-                        return False
-
-    def has_object_permission(self, request, view: View, obj: User) -> bool:        
-        return request.user.is_authenticated and obj == request.user or request.user.is_staff
-    
-    
-
-         
-
-
-            
-
+                if obj.id == request.user.id:
+                    return True
