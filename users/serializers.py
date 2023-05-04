@@ -1,28 +1,23 @@
+from datetime import date, timedelta
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from .models import User
+import holidays
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # email = serializers.CharField (
-    #     validators= [
-    #         UniqueValidator(
-    #             queryset=User.objects.all(),
-    #             message="user with this email already exists.",
-    #         )
-    #     ]
-    # ),
-    # username = serializers.CharField (        
-    #     validators= [
-    #         UniqueValidator(
-    #             queryset=User.objects.all(),
-    #             message="A user with that username already exists.",
-    #         )
-    #     ],
-    # ),
+
     def create(self, validated_data: dict) -> User:
-        if validated_data["is_superuser"]:
-            return User.objects.create_superuser(**validated_data)
+
+        user_auth = self.context["request"].user
+        if user_auth.is_superuser:
+            if validated_data.get("is_superuser"):
+                return User.objects.create_superuser(**validated_data)
+
+            return User.objects.create_user(**validated_data)
+        
+        staff = validated_data.pop("is_staff", False)
+        superuser = validated_data.pop("is_superuser", False)
 
         return User.objects.create_user(**validated_data)
 
@@ -45,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
             "password": {"write_only": True},
             "cpf": {"write_only": True,},
         }
-        # depth = 1
+
     
     # def update(self, instance: User, validated_data: dict) -> User:
     #     for key, value in validated_data.items():
