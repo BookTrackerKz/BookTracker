@@ -1,8 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import Request, Response, status
-from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.pagination import PageNumberPagination
 from .permissions import CustomBookPermissions
+from copies.models import Copy
 from .models import Book
 from .serializer import BookSerializer, BookFollowersSerializer
 

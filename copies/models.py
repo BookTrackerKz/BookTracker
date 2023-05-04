@@ -8,6 +8,8 @@ class Copy(models.Model):
 
     is_available = models.BooleanField()
     classification_code = models.CharField(max_length=13)
+    is_active = models.BooleanField(default=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     book = models.ForeignKey(
         "books.Book", on_delete=models.CASCADE, related_name="copies"
