@@ -33,6 +33,6 @@ class LoanSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Loan
-        fields = ["copy_id", "user_id", "loan_return",]
+        fields = ["copy_id", "user_id", "loan_return"]
 
     

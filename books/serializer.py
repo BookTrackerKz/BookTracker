@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Book
+from .models import Book, BookFollowers
 from categories.serializers import CategorySerializer
 from categories.models import Category
 from publishing_company.serializers import PublisherSerializer
@@ -38,3 +38,11 @@ class BookSerializer(serializers.ModelSerializer):
             category=category, publisher=publisher, **validated_data
         )
         return book
+
+
+class BookFollowersSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    followed_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data: dict) -> BookFollowers:
+        return BookFollowers.objects.create(**validated_data)
