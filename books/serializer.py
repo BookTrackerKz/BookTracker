@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Book
+from copies.models import Copy
 from categories.serializers import CategorySerializer
 from categories.models import Category
 from publishing_company.serializers import PublisherSerializer
@@ -61,3 +62,33 @@ class BookSerializer(serializers.ModelSerializer):
         copies = [Copy(book=book, **copy_data) for copy_data in copies_data]
         Copy.objects.bulk_create(copies)
         return book
+
+
+class BookSerializerUpdate(serializers.ModelSerializer):
+    category = CategorySerializer()
+    publisher = PublisherSerializer()
+    copies = CopySerializer(many=True)
+
+    def update(self, instance, validated_data):
+        category_data = validated_data.pop("category", None)
+        publisher_data = validated_data.pop("publisher", None)
+        copies_data = validated_data.pop("copies", None)
+        if category_data:
+            category, _ = Category.objects.get_or_create(name=category_data["name"])
+            validated_data["category"] = category
+        if publisher_data:
+            publisher, _ = Publisher.objects.get_or_create(name=publisher_data["name"])
+            validated_data["publisher"] = publisher
+        for copy_data in copies_data:
+            copy_id = copy_data.get("id", None)
+            if copy_id:
+                copy = Copy.objects.get(id=copy_id, book=instance)
+                copy.is_available = copy_data.get("is_available", copy.status)
+                copy.save()
+            else:
+                Copy.objects.create(book=instance, **copy_data)
+        return super().update(instance, validated_data)
+
+    class Meta(BookSerializer.Meta):
+        fields = ["title", "author", "category", "publisher", "copies"]
+        partial = True

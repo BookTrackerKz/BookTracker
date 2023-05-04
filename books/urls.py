@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from copies.views import CopyDetailView
+from copies.views import CopyDetailView
 from rest_framework_simplejwt import views as jwt_views
 
 

@@ -1,6 +1,4 @@
 from django.db import models
-<<<<<<< HEAD
-=======
 import uuid
 
 
@@ -15,4 +13,3 @@ import uuid
 #     copy = models.ForeignKey(
 #         "copies.Copy", on_delete=models.CASCADE, related_name="loans"
 #     )
->>>>>>> 60ff90681c0650c4c51cee066d681bbbdb88d975
