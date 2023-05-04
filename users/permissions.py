@@ -3,16 +3,28 @@ from .models import User
 from rest_framework.views import View
 
 
-class IsAllowedUser(permissions.BasePermission):
+    
+class IsAllowedUserToRetrieveAndModify(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        return (
-            request.method in permissions.SAFE_METHODS
-            or request.user.is_authenticated
-            and request.user.is_superuser
-            or request.user.is_staff
-        )
 
+        if request.user.is_authenticated:
+            if request.user.is_superuser:
+                return True
+            else:
+                if request.method in permissions.SAFE_METHODS:
+                    if request.user.is_staff:
+                        return True
+                    else:
+                        return False
 
     def has_object_permission(self, request, view: View, obj: User) -> bool:        
-        return request.user.is_authenticated and obj == request.user or is_staff
+        return request.user.is_authenticated and obj == request.user or request.user.is_staff
+    
+    
+
+         
+
+
+            
+

@@ -53,7 +53,6 @@ MY_APPS = [
     "books",
     "categories",
     "copies",
-    "following",
     "loans",
     "publishing_company",
 ]
@@ -93,23 +92,23 @@ WSGI_APPLICATION = 'book_tracker.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "USER": os.getenv("POSTGRES_DB_USERNAME"),
-        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
-        "HOST": os.getenv("POSTGRES_DB_HOST"),
-        "PORT": os.getenv("POSTGRES_DB_PORT"),
-        "NAME": os.getenv("POSTGRES_DB_NAME"),
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "USER": os.getenv("POSTGRES_DB_USERNAME"),
+#         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+#         "HOST": os.getenv("POSTGRES_DB_HOST"),
+#         "PORT": os.getenv("POSTGRES_DB_PORT"),
+#         "NAME": os.getenv("POSTGRES_DB_NAME"),
+#     }
+# }
 
 
 # Password validation

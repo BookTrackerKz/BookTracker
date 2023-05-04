@@ -2,8 +2,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import Response,  status
 from rest_framework.generics import CreateAPIView, UpdateAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from loans.models import Loan
-from users.models import User
+# from loans.models import Loan
+from users.models import User, Loan
 from copies.models import Copy
 from loans.serializers import LoanSerializer
 from loans.permissions import IsStaffUser
@@ -27,6 +27,12 @@ class LoanView(CreateAPIView):
         copy_data = get_object_or_404(Copy, id=self.kwargs.get("copy_id"))
         if not copy_data.is_available:
             return Response({"error": "This book copy is not available."}, status=status.HTTP_400_BAD_REQUEST, headers=headers)
+        
+
+        user_obj = get_object_or_404(User, id=self.kwargs.get("user_id"))
+        if user_obj.number_loans == 5:
+            return Response({"error": "You have already reached the maximun number of loans. Please, return one book to be able to loan a new book"}, status=status.HTTP_400_BAD_REQUEST, headers=headers)
+        
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
