@@ -4,10 +4,16 @@ import uuid
 
 
 class CopySerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField(
-        primary_key=True, default=uuid.uuid4, editable=False, read_only=True
-    )
+    id = serializers.UUIDField(read_only=True)
+
+    partial = True
+
+    def update(self, instance, validated_data):
+        instance.is_availabe = validated_data.get("is_available", instance.is_available)
+        # instance.is_active = validated_data.get("is_active", instance.is_active)
+        instance.save()
+        return super().update(instance, validated_data)
 
     class Meta:
         model = Copy
-        fields = ["is_available", "classification_code", "book_id"]
+        fields = ["id", "is_available", "classification_code", "book_id"]
