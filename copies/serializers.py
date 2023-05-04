@@ -10,4 +10,4 @@ class CopySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Copy
-        fields = ["is_available", "classification_code", "book_id"]
+        fields = ["is_available", "classification_code", "book_id", "is_active", "deleted_at"]
