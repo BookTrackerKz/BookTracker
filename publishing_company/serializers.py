@@ -12,4 +12,3 @@ class PublisherSerializer(serializers.ModelSerializer):
         fields = ["id", "name"]
 
         read_only_fields = ["id"]
-        
