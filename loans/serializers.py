@@ -1,7 +1,9 @@
 from rest_framework import serializers
 from datetime import date, timedelta
 from users.models import User, Loan
+from users.serializers import UserSerializer
 from copies.models import Copy
+from copies.serializers import CopySerializer
 from django.shortcuts import get_object_or_404
 import holidays
 
@@ -17,6 +19,7 @@ class LoanSerializer(serializers.ModelSerializer):
         user_obj.save()
 
         today_date = date.today()
+
         loan_delta = timedelta(14)
         br_holidays = holidays.BR()
         estimated_return = today_date + loan_delta
@@ -39,7 +42,6 @@ class LoanSerializer(serializers.ModelSerializer):
     def update(self, instance: Loan, validated_data: dict) -> Loan:
         import ipdb
 
-        ipdb.set_trace()
         copy_obj = get_object_or_404(Copy, pk=instance.copy_id)
         copy_obj.is_available = True
         copy_obj.save()
@@ -47,17 +49,17 @@ class LoanSerializer(serializers.ModelSerializer):
         user_obj = get_object_or_404(User, pk=instance.user_id)
         user_obj.number_loans -= 1
         if instance.loan_estimate_return < date.today():
-            user_obj.cleared_date = instance.loan_return + timedelta(7)
+            user_obj.cleared_date = date.today() + timedelta(7)
         user_obj.save()
 
         instance.loan_return = date.today()
         instance.save()
-        ipdb.set_trace()
+
         return instance
 
     id = serializers.UUIDField(read_only=True)
-    copy = serializers.UUIDField(read_only=True)
-    user = serializers.UUIDField(read_only=True)
+    copy = CopySerializer(read_only=True)
+    user = UserSerializer(read_only=True)
     loan_withdraw = serializers.DateField(read_only=True)
     loan_estimate_return = serializers.DateField(read_only=True)
 

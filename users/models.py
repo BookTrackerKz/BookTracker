@@ -14,7 +14,7 @@ class User(AbstractUser):
     number_loans = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(5)], default=0
     )
-    cleared_date = models.DateField(auto_now=True)
+    cleared_date = models.DateField()
 
     loan = models.ManyToManyField(
         "copies.Copy", through="users.Loan", related_name="users_loan"

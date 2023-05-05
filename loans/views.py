@@ -46,7 +46,7 @@ class LoanView(CreateAPIView):
         if user_obj.cleared_date > date.today():
             return Response(
                 {
-                    "error": f"You account is blocked to new loans until {user_obj.cleared_date}"
+                    "error": f"Your account is blocked to new loans until {user_obj.cleared_date}"
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
