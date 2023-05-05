@@ -1,5 +1,6 @@
 from django.db import models
 import uuid
+from users.models import User
 
 
 class Book(models.Model):
@@ -16,12 +17,26 @@ class Book(models.Model):
         "categories.Category", on_delete=models.CASCADE, related_name="books"
     )
     publisher = models.ForeignKey(
-        "publishing_company.Publisher", on_delete=models.CASCADE, related_name="books"
+        "publishing_company.Publisher",
+        on_delete=models.CASCADE,
+        related_name="book_published",
     )
     followers = models.ManyToManyField(
-        "users.User",
-        related_name="following_books",
+        User,
+        through="books.BookFollowers",
+        related_name="user_following_books",
     )
 
     class Meta:
         ordering = ["id"]
+
+
+class BookFollowers(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    followed_at = models.DateTimeField(auto_now_add=True)
+    book = models.ForeignKey(
+        "books.Book", on_delete=models.CASCADE, related_name="book_follower"
+    )
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="user_follower_book"
+    )

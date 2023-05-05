@@ -3,7 +3,7 @@ from rest_framework.views import APIView, Request, Response, status
 from users.models import User
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.serializers import UserSerializer
-from users.permissions import IsAllowedUserToRetrieveAndModify
+from users.permissions import IsAllowedUserToRetrieveAndModify, IsEstudentOwner
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 
@@ -24,7 +24,8 @@ class SuperUserView(ListCreateAPIView):
 
 class UserDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAllowedUserToRetrieveAndModify]
+    permission_classes = [IsEstudentOwner]
+    # permission_classes = [IsEstudentOwner, IsAllowedUserToRetrieveAndModify]
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
