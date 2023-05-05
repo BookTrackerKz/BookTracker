@@ -20,8 +20,6 @@ class LoanSerializer(serializers.ModelSerializer):
 
         today_date = date.today()
 
-        print("CURRENT DAY : ", today_date)
-
         loan_delta = timedelta(14)
         br_holidays = holidays.BR()
         estimated_return = today_date + loan_delta
@@ -33,12 +31,9 @@ class LoanSerializer(serializers.ModelSerializer):
             estimated_return += timedelta(2)
         elif week_day == 6:
             estimated_return += timedelta(1)
-        print(estimated_return)
 
         if estimated_return in br_holidays:
             estimated_return += timedelta(1)
-
-        estimated_return = today_date + timedelta(-5)
 
         validated_data["loan_estimate_return"] = estimated_return
 
