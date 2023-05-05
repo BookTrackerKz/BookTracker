@@ -3,6 +3,9 @@ from datetime import date, timedelta
 from users.models import User, Loan
 from users.serializers import UserSerializer
 from copies.models import Copy
+from books.models import BookFollowers
+from django.core.mail import send_mass_mail, send_mail
+from django.conf import settings
 from copies.serializers import CopySerializer
 from django.shortcuts import get_object_or_404
 import holidays
@@ -20,7 +23,8 @@ class LoanSerializer(serializers.ModelSerializer):
 
         today_date = date.today()
 
-        loan_delta = timedelta(14)
+        # loan_delta = timedelta(14)
+        loan_delta = timedelta(settings.LOAN_LENGTH)
         br_holidays = holidays.BR()
         estimated_return = today_date + loan_delta
 
@@ -46,10 +50,30 @@ class LoanSerializer(serializers.ModelSerializer):
         copy_obj.is_available = True
         copy_obj.save()
 
+        # followers = BookFollowers.objects.filter(book_id=copy_obj.book_id)
+        # user_email = followers.pop("followed_by")
+        # import ipdb
+
+        # ipdb.set_trace()
+        if copy_obj.book.title:
+            # user_email = followers.pop("email")
+            # print(user_email)
+            send_mail(
+                subject="Livro solicitado esta disponível",
+                message=f"O livro {copy_obj.book.title} encontra-se disponível para empréstimo",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[
+                    "ferrazj@uol.com.br",
+                    "samir3500@gmail.com",
+                    "cielbispo5@gmail.com",
+                ],
+                fail_silently=False,
+            )
+
         user_obj = get_object_or_404(User, pk=instance.user_id)
         user_obj.number_loans -= 1
         if instance.loan_estimate_return < date.today():
-            user_obj.cleared_date = date.today() + timedelta(7)
+            user_obj.cleared_date = date.today() + timedelta(settings.USER_LOCK_WINDOW)
         user_obj.save()
 
         instance.loan_return = date.today()

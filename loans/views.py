@@ -11,6 +11,7 @@ from users.models import User, Loan
 from copies.models import Copy
 from loans.serializers import LoanSerializer
 from loans.permissions import IsStaffUser, IsLoanOwner
+from django.conf import settings
 
 
 class LoanView(CreateAPIView):
@@ -35,7 +36,7 @@ class LoanView(CreateAPIView):
             )
 
         user_obj = get_object_or_404(User, id=self.kwargs.get("user_id"))
-        if user_obj.number_loans == 5:
+        if user_obj.number_loans == settings.MAX_LOANS:
             return Response(
                 {
                     "error": "You have already reached the maximun number of loans. Please, return one book to be able to loan a new book"

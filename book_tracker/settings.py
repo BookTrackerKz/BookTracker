@@ -47,7 +47,7 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-THIRD_PARTY_APPS = ["rest_framework"]
+THIRD_PARTY_APPS = ["rest_framework", "drf_spectacular"]
 
 MY_APPS = [
     "users",
@@ -164,3 +164,23 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Book Tracker - BibliotecaKA",
+    "DESCRIPTION": "Aplicação que faz a gestão de uma biblioteca",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
+# export DJANGO_SETTINGS_MODULE=book_tracker.settings - executar no terminal
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_USE_TLS = True
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = os.getenv("EMAIL_PORT")
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+
+# período de empréstimo e bloqueio de usuário
+LOAN_LENGTH = 14
+USER_LOCK_WINDOW = 7
+MAX_LOANS = 5
