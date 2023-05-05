@@ -34,6 +34,7 @@ class Book(models.Model):
 class BookFollowers(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     followed_at = models.DateTimeField(auto_now_add=True)
+
     book = models.ForeignKey(
         "books.Book", on_delete=models.CASCADE, related_name="book_follower"
     )
