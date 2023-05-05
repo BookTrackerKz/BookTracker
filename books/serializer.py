@@ -79,14 +79,6 @@ class BookSerializerUpdate(serializers.ModelSerializer):
         if publisher_data:
             publisher, _ = Publisher.objects.get_or_create(name=publisher_data["name"])
             validated_data["publisher"] = publisher
-        for copy_data in copies_data:
-            copy_id = copy_data.get("id", None)
-            if copy_id:
-                copy = Copy.objects.get(id=copy_id, book=instance)
-                copy.is_available = copy_data.get("is_available", copy.status)
-                copy.save()
-            else:
-                Copy.objects.create(book=instance, **copy_data)
         return super().update(instance, validated_data)
 
     class Meta(BookSerializer.Meta):
