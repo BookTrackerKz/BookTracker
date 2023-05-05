@@ -18,6 +18,7 @@ class CopySerializer(serializers.ModelSerializer):
         model = Copy
 
         fields = [
+            "id",
             "is_available",
             "classification_code",
             "book_id",

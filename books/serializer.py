@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Book
+from .models import Book, BookFollowers
 from copies.models import Copy
 from categories.serializers import CategorySerializer
 from categories.models import Category
@@ -92,3 +92,16 @@ class BookSerializerUpdate(serializers.ModelSerializer):
     class Meta(BookSerializer.Meta):
         fields = ["title", "author", "category", "publisher", "copies"]
         partial = True
+
+
+class BookFollowersSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    followed_at = serializers.DateTimeField(read_only=True)
+    followed_by = serializers.CharField(source="user.email", read_only=True)
+
+    def create(self, validated_data: dict) -> BookFollowers:
+        return BookFollowers.objects.create(**validated_data)
+
+    class Meta:
+        model = BookFollowers
+        fields = ["id", "book_id", "user_id", "followed_at", "followed_by"]

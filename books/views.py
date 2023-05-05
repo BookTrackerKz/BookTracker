@@ -2,14 +2,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import Request, Response, status
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from .permissions import CustomBookPermissions
-from copies.models import Copy
-from copies.models import Copy
-from .models import Book
-from .serializer import BookSerializer, BookFollowersSerializer
-from .serializer import BookSerializer, BookSerializerUpdate
+from .models import Book, BookFollowers
+from users.models import User
+from .serializer import BookSerializer, BookFollowersSerializer, BookSerializerUpdate
 
 
 class BookView(ListCreateAPIView):
@@ -30,18 +27,36 @@ class BookView(ListCreateAPIView):
 
 
 class BookFollowersView(ListCreateAPIView):
-    queryset = Book.objects.all()
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = BookFollowers.objects.all()
     serializer_class = BookFollowersSerializer
 
-    # def post(self, request: Request, book_id: int) -> Response:
-    #     get_object_or_404(Book, pk=book_id)
-    #     serializer = BookFollowersSerializer(data=request.data)
+    def create(self, request, *args, **kwargs):
+        book_data = get_object_or_404(Book, id=self.kwargs.get("book_id"))
+        user_data = get_object_or_404(User, id=self.request.user.id)
+        followed = BookFollowers.objects.filter(
+            book_id=book_data.id, user_id=user_data.id
+        ).first()
+        if followed:
+            return Response(
+                {"error": "You have already followed this book"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
-    #     serializer.is_valid(raise_exception=True)
+    def perform_create(self, serializer) -> None:
+        book_data = get_object_or_404(Book, id=self.kwargs.get("book_id"))
+        user_data = get_object_or_404(User, id=self.request.user.id)
 
-    #     serializer.save(user=request.user.id, book=book_id)
-
-    #     return Response(serializer.data, status.HTTP_201_CREATED)
+        serializer.save(book=book_data, user=user_data)
 
 
 class BookDetailView(RetrieveUpdateDestroyAPIView):
