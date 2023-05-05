@@ -1,9 +1,8 @@
-
 from django import views
 from django.urls import path
-from loans.views import LoanDetailView
+from loans.views import LoanDetailView, UserLoanDetailView
 
 urlpatterns = [
-    path("loans/<uuid:loan_id>/", views.LoanDetailView.as_view())
+    path("loans/<loan_id>/", LoanDetailView.as_view()),
+    path("loans/<user_id>/users/", UserLoanDetailView.as_view()),
 ]
-

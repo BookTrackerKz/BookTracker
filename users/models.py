@@ -20,11 +20,15 @@ class User(AbstractUser):
         "copies.Copy", through="users.Loan", related_name="users_loan"
     )
 
+    # def __str__(self) -> str:
+    #     return f"({self.id}) - {self.email}"
+
 
 class Loan(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     loan_withdraw = models.DateField(auto_now_add=True)
     loan_return = models.DateField(null=True, default=None)
+    loan_estimate_return = models.DateField()
 
     user = models.ForeignKey(
         "users.User", on_delete=models.CASCADE, related_name="user_loans"
