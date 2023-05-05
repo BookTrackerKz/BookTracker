@@ -6,6 +6,7 @@ import uuid
 
 class CopySerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
+    is_available = serializers.BooleanField(default=True, read_only=True)
 
     partial = True
 
