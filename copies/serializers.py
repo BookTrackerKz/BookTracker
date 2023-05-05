@@ -1,16 +1,18 @@
 from rest_framework import serializers
 from .models import Copy
+from django.utils import timezone
 import uuid
 
 
 class CopySerializer(serializers.ModelSerializer):
     id = serializers.UUIDField(read_only=True)
+    is_available = serializers.BooleanField(default=True, read_only=True)
 
     partial = True
 
     def update(self, instance, validated_data):
         instance.is_availabe = validated_data.get("is_available", instance.is_available)
-        # instance.is_active = validated_data.get("is_active", instance.is_active)
+        instance.is_active = validated_data.get("is_active", instance.is_active)
         instance.save()
         return super().update(instance, validated_data)
 

@@ -1,12 +1,12 @@
-from django.shortcuts import get_object_or_404
-from rest_framework.views import Request, Response, status
 from rest_framework.generics import (
     ListCreateAPIView,
     RetrieveUpdateDestroyAPIView,
     DestroyAPIView,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.views import Response, status
 from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 from .permissions import CustomBookPermissions
 from users.permissions import IsAllowedUserToRetrieveAndModify
 from .models import Book, BookFollowers
