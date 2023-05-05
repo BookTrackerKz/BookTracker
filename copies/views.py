@@ -7,14 +7,13 @@ from .models import Copy
 from django.utils import timezone
 
 
-# Create your views here.
 class CopyDetailView(RetrieveUpdateDestroyAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [CustomBookPermissions]
 
     queryset = Copy.objects.all()
     serializer_class = CopySerializer
-    lookup_field = "id"
+    lookup_url_kwarg = "copy_id"
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
