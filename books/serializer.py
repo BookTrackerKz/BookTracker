@@ -5,7 +5,23 @@ from categories.serializers import CategorySerializer
 from categories.models import Category
 from publishing_company.serializers import PublisherSerializer
 from copies.serializers import CopySerializer
+from users.serializers import UserSerializer
+
 from publishing_company.models import Publisher
+
+
+class BookFollowersSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    followed_at = serializers.DateTimeField(read_only=True)
+    followed_by = serializers.CharField(source="user.email", read_only=True)
+    user = UserSerializer(read_only=True)
+
+    def create(self, validated_data: dict) -> BookFollowers:
+        return BookFollowers.objects.create(**validated_data)
+
+    class Meta:
+        model = BookFollowers
+        fields = ["id", "book_id", "user_id", "followed_at", "followed_by", "user"]
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -14,6 +30,8 @@ class BookSerializer(serializers.ModelSerializer):
     publisher = PublisherSerializer()
     copies = CopySerializer(many=True)
     num_copies = serializers.SerializerMethodField()
+    followers = BookFollowersSerializer(many=True)
+    num_followers = serializers.SerializerMethodField()
 
     class Meta:
         model = Book
@@ -30,10 +48,15 @@ class BookSerializer(serializers.ModelSerializer):
             "publisher",
             "copies",
             "num_copies",
+            "followers",
+            "num_followers",
         ]
 
     def get_num_copies(self, obj):
         return obj.copies.count()
+
+    def get_num_followers(self, obj):
+        return obj.followers.count()
 
     def create(self, validated_data):
         category_data = validated_data.pop("category")
