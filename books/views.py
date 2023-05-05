@@ -8,7 +8,7 @@ from rest_framework.views import Response, status
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .permissions import CustomBookPermissions
-from users.permissions import IsAllowedUserToRetrieveAndModify
+from users.permissions import OnlyUserCompanyCanAcces
 from .models import Book, BookFollowers
 from users.models import User
 from .serializer import BookSerializer, BookFollowersSerializer, BookSerializerUpdate
@@ -74,7 +74,7 @@ class BookFollowersView(ListCreateAPIView):
 
 class BookFollowersDetailView(DestroyAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAllowedUserToRetrieveAndModify]
+    permission_classes = [OnlyUserCompanyCanAcces]
     queryset = BookFollowers.objects.all()
     serializer_class = BookFollowersSerializer
     lookup_field = "id"
