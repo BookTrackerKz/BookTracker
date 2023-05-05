@@ -1,12 +1,11 @@
 from rest_framework import serializers
-from .models import Book
+from .models import Book, BookFollowers
 from copies.models import Copy
 from categories.serializers import CategorySerializer
 from categories.models import Category
 from publishing_company.serializers import PublisherSerializer
 from copies.serializers import CopySerializer
 from publishing_company.models import Publisher
-import uuid
 
 
 class BookSerializer(serializers.ModelSerializer):
@@ -79,16 +78,21 @@ class BookSerializerUpdate(serializers.ModelSerializer):
         if publisher_data:
             publisher, _ = Publisher.objects.get_or_create(name=publisher_data["name"])
             validated_data["publisher"] = publisher
-        for copy_data in copies_data:
-            copy_id = copy_data.get("id", None)
-            if copy_id:
-                copy = Copy.objects.get(id=copy_id, book=instance)
-                copy.is_available = copy_data.get("is_available", copy.status)
-                copy.save()
-            else:
-                Copy.objects.create(book=instance, **copy_data)
         return super().update(instance, validated_data)
 
     class Meta(BookSerializer.Meta):
         fields = ["title", "author", "category", "publisher", "copies"]
         partial = True
+
+
+class BookFollowersSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField(read_only=True)
+    followed_at = serializers.DateTimeField(read_only=True)
+    followed_by = serializers.CharField(source="user.email", read_only=True)
+
+    def create(self, validated_data: dict) -> BookFollowers:
+        return BookFollowers.objects.create(**validated_data)
+
+    class Meta:
+        model = BookFollowers
+        fields = ["id", "followed_at", "followed_by"]
