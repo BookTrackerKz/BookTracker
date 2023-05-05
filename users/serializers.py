@@ -2,7 +2,6 @@ from datetime import date, timedelta
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from .models import User
-import holidays
 
 
 class UserSerializer(serializers.ModelSerializer):
