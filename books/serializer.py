@@ -30,7 +30,7 @@ class BookSerializer(serializers.ModelSerializer):
     publisher = PublisherSerializer()
     copies = CopySerializer(many=True)
     num_copies = serializers.SerializerMethodField()
-    followers = BookFollowersSerializer(many=True)
+    followers = BookFollowersSerializer(many=True, read_only=True)
     num_followers = serializers.SerializerMethodField()
 
     class Meta:

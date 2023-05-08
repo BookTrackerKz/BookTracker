@@ -50,23 +50,18 @@ class LoanSerializer(serializers.ModelSerializer):
         copy_obj.is_available = True
         copy_obj.save()
 
-        # followers = BookFollowers.objects.filter(book_id=copy_obj.book_id)
-        # user_email = followers.pop("followed_by")
-        # import ipdb
+        user_emails = []
+        followers = BookFollowers.objects.filter(book_id=copy_obj.book_id)
+        if followers:
+            for follower in followers:
+                user_emails.append(follower.user.email)
 
-        # ipdb.set_trace()
         if copy_obj.book.title:
-            # user_email = followers.pop("email")
-            # print(user_email)
             send_mail(
                 subject="Livro solicitado esta disponível",
                 message=f"O livro {copy_obj.book.title} encontra-se disponível para empréstimo",
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[
-                    "ferrazj@uol.com.br",
-                    "samir3500@gmail.com",
-                    "cielbispo5@gmail.com",
-                ],
+                recipient_list=user_emails,
                 fail_silently=False,
             )
 
