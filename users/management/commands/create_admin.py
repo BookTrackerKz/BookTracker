@@ -2,6 +2,7 @@
 from users.models import User
 from django.core.management.base import BaseCommand, CommandParser, CommandError
 from django.utils.crypto import get_random_string
+from datetime import date
 
 
 class Command(BaseCommand):
@@ -41,8 +42,13 @@ class Command(BaseCommand):
         if email:
             raise CommandError(f"Email `{admin_email}` already taken.")
 
+        admin_cleared_date = date.today()
+
         User.objects.create_superuser(
-            username=admin_username, password=admin_password, email=admin_email
+            username=admin_username,
+            password=admin_password,
+            email=admin_email,
+            cleared_date=admin_cleared_date,
         )
         self.stdout.write(
             self.style.SUCCESS("Admin `%s` successfully created!" % admin_username)

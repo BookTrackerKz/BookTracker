@@ -4,14 +4,18 @@ from rest_framework.generics import (
     CreateAPIView,
     UpdateAPIView,
     ListAPIView,
+    ListCreateAPIView,
 )
-from datetime import date
+import datetime
+import time
+from datetime import date, timedelta
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.models import User, Loan
 from copies.models import Copy
 from loans.serializers import LoanSerializer
 from loans.permissions import IsStaffUser, IsLoanOwner
 from django.conf import settings
+from django.core.mail import send_mail
 
 
 class LoanView(CreateAPIView):
@@ -87,3 +91,68 @@ class UserLoanDetailView(ListAPIView):
 
     def get_queryset(self):
         return Loan.objects.filter(user_id=self.kwargs.get("user_id"))
+
+
+class LoanNotificationDelayedView(ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsStaffUser]
+
+    print("*" * 10)
+    # queryset = Loan.objects.all()
+    # serializer_class = LoanSerializer
+    # print("*" * 10)
+
+    def get_queryset(self):
+        user_emails = []
+
+        today = date.today()
+        print(type(Loan.loan_estimate_return))
+
+        return_date = time.mktime(
+            datetime.datetime.strptime(Loan.loan_estimate_return, format="%Y-%m-%d")
+        )
+
+        loans = Loan.objects.filter(return_date < today)
+
+        if loans.__len__ > 0:
+            for loan in loans:
+                user_email = [loan.user.email]
+                book = loan.copy
+                import ipdb
+
+                ipdb.set_trace()
+                send_mail(
+                    subject="Livro solicitado esta disponível",
+                    message=f"O livro {loan.copy.book.title} encontra-se atrasado para devolucao. Por favor, compareça à biblioteca para devolvê-lo",
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=user_email,
+                    fail_silently=False,
+                )
+        return Loan.objects.all()
+
+
+class LoanNotificationCloseToDueDate(ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsStaffUser]
+
+    print("*" * 10)
+    queryset = Loan.objects.all()
+    serializer_class = LoanSerializer
+    # user_emails = []
+    # tomorrow = date.today() + timedelta(1)
+    # loans = Loan.objects.filter(Loan.loan_estimate_return == tomorrow)
+
+    # if user_emails:
+    #     for loan in loans:
+    #         user_email = [loan.user.email]
+    #         book = loan.copy
+    #         import ipdb
+
+    #         ipdb.set_trace()
+    #         send_mail(
+    #             subject="Livro solicitado esta disponível",
+    #             message=f"O livro {loan.copy.book.title} encontra-se atrasado para devolucao. Por favor, compareça à biblioteca para devolvê-lo",
+    #             from_email=settings.EMAIL_HOST_USER,
+    #             recipient_list=user_emails,
+    #             fail_silently=False,
+    #         )
