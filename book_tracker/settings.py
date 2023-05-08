@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import timedelta
 import os
 import dotenv
+import dj_database_url
 from django.core.management.utils import get_random_secret_key
 
 dotenv.load_dotenv()
@@ -34,6 +35,11 @@ SECRET_KEY = os.getenv("SECRET_KEY", get_random_secret_key())
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+RAILWAY_STATIC_URL = os.getenv("RAILWAY_STATIC_URL")
+
+if RAILWAY_STATIC_URL:
+    ALLOWED_HOSTS += [RAILWAY_STATIC_URL, "0.0.0.0"]
 
 
 # Application definition
@@ -67,6 +73,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "book_tracker.urls"
@@ -100,6 +107,7 @@ WSGI_APPLICATION = "book_tracker.wsgi.application"
 #     }
 # }
 
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -110,6 +118,19 @@ DATABASES = {
         "NAME": os.getenv("POSTGRES_DB_NAME"),
     }
 }
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if DATABASE_URL:
+    db_from_env = dj_database_url.config(
+        default=DATABASE_URL, conn_max_age=500, ssl_require=True
+    )
+    DATABASES["default"].update(db_from_env)
+    DEBUG = False
+
+if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
