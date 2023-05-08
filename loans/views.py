@@ -1,10 +1,9 @@
 from django.shortcuts import get_object_or_404
-from rest_framework.views import Response, status
+from rest_framework.views import Response, status, APIView
 from rest_framework.generics import (
     CreateAPIView,
     UpdateAPIView,
     ListAPIView,
-    ListCreateAPIView,
 )
 import datetime
 import time
@@ -12,7 +11,7 @@ from datetime import date, timedelta
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from users.models import User, Loan
 from copies.models import Copy
-from loans.serializers import LoanSerializer
+from loans.serializers import LoanSerializer, LoanDelaySerializer
 from loans.permissions import IsStaffUser, IsLoanOwner
 from django.conf import settings
 from django.core.mail import send_mail
@@ -73,19 +72,11 @@ class LoanDetailView(UpdateAPIView):
     serializer_class = LoanSerializer
     lookup_url_kwarg = "loan_id"
 
-    # def patch(self, request, *args, **kwargs):
-    #     loan_data = get_object_or_404(Loan, id=self.kwargs.get("loan_id"))
-    #     import ipdb
-
-    #     ipdb.set_trace()
-    #     return self.partial_update(loan_data, *args, **kwargs)
-
 
 class UserLoanDetailView(ListAPIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsStaffUser, IsLoanOwner]
+    permission_classes = [IsLoanOwner]
 
-    # queryset = Loan.objects.all()
     serializer_class = LoanSerializer
     lookup_url_kwarg = "user_id"
 
@@ -93,66 +84,73 @@ class UserLoanDetailView(ListAPIView):
         return Loan.objects.filter(user_id=self.kwargs.get("user_id"))
 
 
-class LoanNotificationDelayedView(ListAPIView):
+class LoanNotificationDelayedView(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsStaffUser]
 
-    print("*" * 10)
-    # queryset = Loan.objects.all()
-    # serializer_class = LoanSerializer
-    # print("*" * 10)
+    def get(self, request, *args, **kwargs):
+        delayed_loans_emails = []
+        today = time.time()
 
-    def get_queryset(self):
-        user_emails = []
+        total_loans = Loan.objects.filter(loan_return=None)
 
-        today = date.today()
-        print(type(Loan.loan_estimate_return))
+        for loan in total_loans:
+            estimate_return_date = time.mktime(
+                datetime.datetime.strptime(
+                    str(loan.loan_estimate_return), "%Y-%m-%d"
+                ).timetuple()
+            )
 
-        return_date = time.mktime(
-            datetime.datetime.strptime(Loan.loan_estimate_return, format="%Y-%m-%d")
-        )
-
-        loans = Loan.objects.filter(return_date < today)
-
-        if loans.__len__ > 0:
-            for loan in loans:
+            if estimate_return_date < today:
                 user_email = [loan.user.email]
-                book = loan.copy
-                import ipdb
-
-                ipdb.set_trace()
                 send_mail(
-                    subject="Livro solicitado esta disponível",
-                    message=f"O livro {loan.copy.book.title} encontra-se atrasado para devolucao. Por favor, compareça à biblioteca para devolvê-lo",
+                    subject="Empréstimo atrasado.",
+                    message=f"O livro {loan.copy.book.title} encontra-se atrasado para devolucao. Por favor, compareça à biblioteca para devolvê-lo.",
                     from_email=settings.EMAIL_HOST_USER,
                     recipient_list=user_email,
                     fail_silently=False,
                 )
-        return Loan.objects.all()
+                delayed_loans_emails.append(user_email)
+
+        serializer = LoanDelaySerializer(delayed_loans_emails, many=True)
+
+        return Response(serializer.data)
 
 
-class LoanNotificationCloseToDueDate(ListAPIView):
+class LoanNotificationCloseToDueDate(APIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsStaffUser]
 
-    print("*" * 10)
-    queryset = Loan.objects.all()
-    serializer_class = LoanSerializer
-    # user_emails = []
-    # tomorrow = date.today() + timedelta(1)
-    # loans = Loan.objects.filter(Loan.loan_estimate_return == tomorrow)
+    def get(self, request, *args, **kwargs):
+        loans_close_to_due_date_emails = []
+        today = date.today()
 
-    # if user_emails:
-    #     for loan in loans:
-    #         user_email = [loan.user.email]
-    #         book = loan.copy
-    #         import ipdb
+        new_today = time.mktime(
+            datetime.datetime.strptime(str(today), "%Y-%m-%d").timetuple()
+        )
 
-    #         ipdb.set_trace()
-    #         send_mail(
-    #             subject="Livro solicitado esta disponível",
-    #             message=f"O livro {loan.copy.book.title} encontra-se atrasado para devolucao. Por favor, compareça à biblioteca para devolvê-lo",
-    #             from_email=settings.EMAIL_HOST_USER,
-    #             recipient_list=user_emails,
-    #             fail_silently=False,
-    #         )
+        tomorrow = new_today + 86400
+
+        total_loans = Loan.objects.filter(loan_return=None)
+
+        for loan in total_loans:
+            estimate_return_date = time.mktime(
+                datetime.datetime.strptime(
+                    str(loan.loan_estimate_return), "%Y-%m-%d"
+                ).timetuple()
+            )
+
+            if estimate_return_date == tomorrow:
+                user_email = [loan.user.email]
+                send_mail(
+                    subject=f"Empréstimo próximo do",
+                    message=f"O empréstimo do livro {loan.copy.book.title} se encerra em {today + timedelta(1)}. Por favor, compareça à biblioteca para devolvê-lo.",
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=user_email,
+                    fail_silently=False,
+                )
+                loans_close_to_due_date_emails.append(user_email)
+
+        serializer = LoanDelaySerializer(loans_close_to_due_date_emails, many=True)
+
+        return Response(serializer.data)

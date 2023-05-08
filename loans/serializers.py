@@ -4,7 +4,7 @@ from users.models import User, Loan
 from users.serializers import UserSerializer
 from copies.models import Copy
 from books.models import BookFollowers
-from django.core.mail import send_mass_mail, send_mail
+from django.core.mail import send_mail
 from django.conf import settings
 from copies.serializers import CopySerializer
 from django.shortcuts import get_object_or_404
@@ -22,9 +22,8 @@ class LoanSerializer(serializers.ModelSerializer):
         user_obj.save()
 
         today_date = date.today()
-
-        # loan_delta = timedelta(14)
         loan_delta = timedelta(settings.LOAN_LENGTH)
+
         br_holidays = holidays.BR()
         estimated_return = today_date + loan_delta
 
@@ -44,8 +43,6 @@ class LoanSerializer(serializers.ModelSerializer):
         return Loan.objects.create(**validated_data)
 
     def update(self, instance: Loan, validated_data: dict) -> Loan:
-        import ipdb
-
         copy_obj = get_object_or_404(Copy, pk=instance.copy_id)
         copy_obj.is_available = True
         copy_obj.save()
@@ -92,3 +89,7 @@ class LoanSerializer(serializers.ModelSerializer):
             "loan_estimate_return",
             "loan_return",
         ]
+
+
+class LoanDelaySerializer(serializers.ListSerializer):
+    child = serializers.EmailField()
