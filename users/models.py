@@ -3,8 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 
-# Create your models here.
-
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -16,8 +14,22 @@ class User(AbstractUser):
     number_loans = models.IntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(5)], default=0
     )
-    cleared_date = models.DateField(auto_now=True)
+    cleared_date = models.DateField()
 
     loan = models.ManyToManyField(
-        "users.User", through="loans.Loan", related_name="user_loans"
+        "copies.Copy", through="users.Loan", related_name="users_loan"
+    )
+
+
+class Loan(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    loan_withdraw = models.DateField(auto_now_add=True)
+    loan_return = models.DateField(null=True, default=None)
+    loan_estimate_return = models.DateField()
+
+    user = models.ForeignKey(
+        "users.User", on_delete=models.CASCADE, related_name="user_loans"
+    )
+    copy = models.ForeignKey(
+        "copies.Copy", on_delete=models.CASCADE, related_name="copy_loans"
     )

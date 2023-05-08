@@ -1,14 +1,33 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.views import APIView, Request, Response, status
-from .models import User
-# from rest_framework_simplejwt.authentication import JWTAuthentication
-from .serializers import UserSerializer
-# from .permissions import IsAccountOwner
-from rest_framework.generics import RetrieveUpdateDestroyAPIView, ListCreateAPIView
+from users.models import User
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from users.serializers import UserSerializer
+from users.permissions import OnlyUserCompanyCanAcces, IsEstudentOwner
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.generics import (
+    RetrieveUpdateDestroyAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 
-
-# Create your views here.
 
 class UserView(ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class SuperUserView(ListCreateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+
+class UserDetailView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsEstudentOwner]
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
