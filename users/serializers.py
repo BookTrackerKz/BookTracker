@@ -78,3 +78,57 @@ class UserUpdateSerializer(serializers.ModelSerializer):
                 "write_only": True,
             },
         }
+
+
+class UserAdminSerializer(serializers.ModelSerializer):
+    def create(self, validated_data: dict) -> User:
+        validated_data["cleared_date"] = date.today()
+        return User.objects.create_superuser(**validated_data)
+
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "username",
+            "is_superuser",
+            "id",
+            "password",
+            "cpf",
+            "is_staff",
+            "number_loans",
+            "cleared_date",
+        ]
+        read_only_fields = ["cleared_date"]
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "cpf": {
+                "write_only": True,
+            },
+        }
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "username",
+            "is_superuser",
+            "id",
+            "password",
+            "cpf",
+            "is_staff",
+            "number_loans",
+            "cleared_date",
+        ]
+        read_only_fields = ["cleared_date", "is_superuser", "is_staff", "is_active"]
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "cpf": {
+                "write_only": True,
+            },
+        }
