@@ -32,7 +32,7 @@ class Command(BaseCommand):
 
         admin_email = options.get("email")
         if not admin_email:
-            admin_email = f"{admin_username}@example.com"
+            admin_email = f"{admin_username}@booktarcker.com"
 
         username = User.objects.filter(username=admin_username).first()
         if username:
