@@ -19,6 +19,18 @@ class UserSerializer(serializers.ModelSerializer):
 
         return User.objects.create_user(**validated_data)
 
+    def update(self, instance: User, validated_data: dict) -> User:
+        user_auth = self.context["request"].user
+        if not user_auth.is_superuser:
+            if validated_data.get("is_superuser"):
+                validated_data.pop("is_superuser")
+            if validated_data.get("is_staff"):
+                validated_data.pop("is_staff")
+            if validated_data.get("is_active"):
+                validated_data.pop("is_active")
+
+        User.objects.update(**validated_data)
+
     class Meta:
         model = User
         fields = [
@@ -35,6 +47,31 @@ class UserSerializer(serializers.ModelSerializer):
             "cleared_date",
         ]
         read_only_fields = ["cleared_date"]
+        extra_kwargs = {
+            "password": {"write_only": True},
+            "cpf": {
+                "write_only": True,
+            },
+        }
+
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "username",
+            "is_superuser",
+            "id",
+            "password",
+            "cpf",
+            "is_staff",
+            "number_loans",
+            "cleared_date",
+        ]
+        read_only_fields = ["cleared_date", "is_superuser", "is_staff", "is_active"]
         extra_kwargs = {
             "password": {"write_only": True},
             "cpf": {

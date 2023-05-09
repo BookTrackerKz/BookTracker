@@ -78,9 +78,9 @@ class UserLoanDetailView(ListAPIView):
     permission_classes = [IsLoanOwner]
 
     serializer_class = LoanSerializer
-    lookup_url_kwarg = "user_id"
 
     def get_queryset(self):
+        user_data = get_object_or_404(User, id=self.kwargs.get("user_id"))
         return Loan.objects.filter(user_id=self.kwargs.get("user_id"))
 
 

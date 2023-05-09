@@ -12,6 +12,6 @@ urlpatterns = [
     path("books/<book_id>/followers/", views.BookFollowersView.as_view()),
     path("books/followers/<id>/", views.BookFollowersDetailView.as_view()),
     path("books/<id>/", views.BookDetailView.as_view()),
-    path("books/<id>/copies/", CopyDetailView.as_view()),
+    path("books/<copy_id>/copies/", CopyDetailView.as_view()),
     path("books/<copy_id>/loans/<user_id>/", LoanView.as_view()),
 ]

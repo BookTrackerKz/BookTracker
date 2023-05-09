@@ -7,8 +7,8 @@ from loans.views import (
 )
 
 urlpatterns = [
+    path("loans/<user_id>/users/", UserLoanDetailView.as_view()),
     path("loans/duedates/", LoanNotificationCloseToDueDate.as_view()),
     path("loans/delays/", LoanNotificationDelayedView.as_view()),
     path("loans/<loan_id>/", LoanDetailView.as_view()),
-    path("loans/<user_id>/users/", UserLoanDetailView.as_view()),
 ]
