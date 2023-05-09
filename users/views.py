@@ -20,8 +20,8 @@ class UserView(ListCreateAPIView):
 
 
 class SuperUserView(ListCreateAPIView):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    # authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated, IsAdminUser]
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
